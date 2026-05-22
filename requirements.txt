@@ -1,0 +1,6 @@
+# Injection Sentry — runtime dependencies
+# Pinned to compatibility ranges tested against the v1 ensemble released 2026-05-20.
+
+transformers>=4.40,<4.51
+torch>=2.1,<2.5
+safetensors>=0.4

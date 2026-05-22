@@ -21,10 +21,11 @@ class InjectionSentryEnsemble:
     model_name = "Injection Sentry"
     WEIGHTS: tuple[float, float, float] = (0.36, 0.26, 0.38)
     THRESHOLD: float = 0.57
-    REPOS: tuple[str, str, str] = (
-        "Verm1ion/injection-sentry-xlmr",
-        "Verm1ion/injection-sentry-deberta",
-        "Verm1ion/injection-sentry-deberta-v2",
+    # Pinned revisions for deterministic reproduction. Bump explicitly when releasing.
+    REPOS: tuple[tuple[str, str], ...] = (
+        ("Verm1ion/injection-sentry-xlmr",       "cea6417fd93bd21f300e2d3a2502d3103483e265"),
+        ("Verm1ion/injection-sentry-deberta",    "ddf8e32951d4e0cd34d874a10d37f80e188c7f26"),
+        ("Verm1ion/injection-sentry-deberta-v2", "125828365b2553762f0b93cf11d7636e0ff9c216"),
     )
 
     ZERO_WIDTH = frozenset("​‌‍⁠﻿­‎‏")
@@ -33,13 +34,14 @@ class InjectionSentryEnsemble:
     WHITESPACE_RE = re.compile(r"\s+")
     INJECTION_LABEL_HINTS = ("INJ", "UNSAFE", "MALICIOUS", "ATTACK")
 
-    def __init__(self, repos: Iterable[str] | None = None) -> None:
+    def __init__(self, repos: Iterable[str | tuple[str, str]] | None = None) -> None:
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
         self.components: list[tuple[AutoTokenizer, AutoModelForSequenceClassification, int]] = []
-        for repo in (repos if repos is not None else self.REPOS):
-            tokenizer = AutoTokenizer.from_pretrained(repo)
+        for entry in (repos if repos is not None else self.REPOS):
+            repo, revision = entry if isinstance(entry, tuple) else (entry, None)
+            tokenizer = AutoTokenizer.from_pretrained(repo, revision=revision)
             model = (
-                AutoModelForSequenceClassification.from_pretrained(repo)
+                AutoModelForSequenceClassification.from_pretrained(repo, revision=revision)
                 .to(self.device)
                 .eval()
             )

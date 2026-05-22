@@ -15,8 +15,10 @@ Submitted to the Lakera PINT benchmark — [`lakeraai/pint-benchmark#35`](https:
 ## Install
 
 ```bash
-pip install transformers torch safetensors
+pip install -r requirements.txt
 ```
+
+Pinned to `transformers>=4.40,<4.51` and `torch>=2.1,<2.5` for deterministic reproduction. The ensemble loads three HuggingFace models, each pinned to a specific revision in [`src/injection_sentry.py`](src/injection_sentry.py).
 
 ## Usage
 
